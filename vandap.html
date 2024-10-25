@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giao diện câu hỏi với Dark Mode</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #e3f2fd;
+            margin: 0;
+            padding: 20px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .container {
+            width: 60%;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        h2, h3 {
+            text-align: center;
+            color: #0d47a1;
+        }
+        .input-group {
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        input[type="text"], button {
+            padding: 12px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        input[type="text"] {
+            width: calc(40% - 10px);
+            margin-right: 10px;
+        }
+        .answer-input {
+            width: calc(40% - 10px);
+        }
+        button {
+            background-color: #42a5f5;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-left: 10px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        button:hover {
+            background-color: #1e88e5;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        th {
+            background-color: #42a5f5;
+            color: white;
+        }
+        .answer {
+            font-weight: bold;
+            color: #d32f2f;
+        }
+        .action-buttons button {
+            padding: 8px 12px;
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            margin: 0 5px;
+            cursor: pointer;
+        }
+        .action-buttons button:hover {
+            background-color: #388e3c;
+        }
+        .action-buttons button.delete {
+            background-color: #f44336;
+        }
+        .action-buttons button.delete:hover {
+            background-color: #d32f2f;
+        }
+        /* Thêm logo */
+        .logo {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .logo img {
+            width: 100px;
+            height: auto;
+        }
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 20px;
+            background-color: #0d47a1;
+            color: white;
+            margin-top: 30px;
+            border-radius: 0 0 10px 10px;
+        }
+        /* Dark Mode CSS */
+        body.dark-mode {
+            background-color: #121212;
+            color: #ffffff;
+        }
+        .container.dark-mode {
+            background-color: #1e1e1e;
+            color: #ffffff;
+        }
+        input[type="text"].dark-mode, button.dark-mode {
+            background-color: #333;
+            color: #ffffff;
+        }
+        th.dark-mode, td.dark-mode {
+            background-color: #333;
+            color: #ffffff;
+        }
+        footer.dark-mode {
+            background-color: #333;
+            color: white;
+        }
+        /* Nút chuyển đổi Dark Mode */
+        .dark-mode-toggle {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .canhgiua {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="dark-mode-toggle">
+    <button onclick="toggleDarkMode()">Chuyển đổi Dark Mode</button>
+</div>
+
+<div class="container">
+    <div class="logo">
+        <img src="path-to-your-logo.png" alt="Logo">
+    </div>
+    <h2>Thêm câu hỏi và đáp án</h2>
+    <div class="input-group">
+        <input type="text" placeholder="Nhập câu hỏi của bạn..." id="questionInput">
+        <input type="text" placeholder="Nhập đáp án của bạn..." id="answerInput" class="answer-input">
+        <button onclick="addQuestion()">Thêm câu hỏi</button>
+        <button onclick="saveData()">Lưu dữ liệu</button>
+        <button onclick="deleteAll()">Xóa tất cả</button>
+    </div>
+
+    <h3>Upload file Excel:</h3>
+    <div class="canhgiua">
+    <input type="file" id="upload" accept=".xls,.xlsx" /></div>
+
+    <h3>Tìm kiếm câu hỏi:</h3>
+    <div class="canhgiua">
+    <input type="text" id="searchInput" placeholder="Tìm kiếm câu hỏi..." onkeyup="searchQuestion()"></div>
+
+    <h3>Nội dung đã thêm:</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Câu hỏi</th>
+                <th>Đáp án</th>
+                <th>Hành động</th>
+            </tr>
+        </thead>
+        <tbody id="questionTable">
+        </tbody>
+    </table>
+</div>
+
+<footer>
+    <p>Bản quyền thuộc về Con Đỉ Bốn Ngôn Lù © 2024</p>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+    // Dark Mode toggle
+    function toggleDarkMode() {
+        document.body.classList.toggle('dark-mode');
+        document.querySelectorAll('.container, input[type="text"], button, th, td, footer').forEach(function(el) {
+            el.classList.toggle('dark-mode');
+        });
+    }
+
+    // Tải dữ liệu từ LocalStorage khi trang được tải
+    window.onload = function() {
+        loadData();
+    };
+
+    // Thêm câu hỏi mới vào bảng
+    function addQuestion() {
+        let question = document.getElementById('questionInput').value;
+        let answer = document.getElementById('answerInput').value;
+        if (question && answer) {
+            addQuestionToTable(question, answer);
+            document.getElementById('questionInput').value = '';
+            document.getElementById('answerInput').value = '';
+
+            // Lưu câu hỏi vào LocalStorage
+            saveToLocalStorage();
+        } else {
+            alert('Vui lòng nhập đầy đủ câu hỏi và đáp án.');
+        }
+    }
+
+    // Tìm kiếm và lọc câu hỏi
+    function searchQuestion() {
+        let input = document.getElementById('searchInput').value.toLowerCase();
+        let table = document.getElementById('questionTable');
+        let rows = table.getElementsByTagName('tr');
+
+        for (let i = 0; i < rows.length; i++) {
+            let questionCell = rows[i].getElementsByTagName('td')[0];
+            if (questionCell) {
+                let questionText = questionCell.textContent.toLowerCase();
+                if (questionText.includes(input)) {
+                    rows[i].style.display = '';  // Hiển thị nếu khớp với từ khóa
+                } else {
+                    rows[i].style.display = 'none';  // Ẩn nếu không khớp
+                }
+            }
+        }
+    }
+
+    // Chỉnh sửa câu hỏi
+    function editQuestion(button) {
+        let row = button.parentElement.parentElement;
+        let questionCell = row.getElementsByTagName('td')[0];
+        let answerCell = row.getElementsByTagName('td')[1];
+
+        let newQuestion = prompt("Chỉnh sửa câu hỏi:", questionCell.textContent);
+        let newAnswer = prompt("Chỉnh sửa đáp án:", answerCell.textContent);
+
+        if (newQuestion && newAnswer) {
+            questionCell.textContent = newQuestion;
+            answerCell.textContent = newAnswer;
+            saveToLocalStorage();
+        }
+    }
+
+    // Xóa câu hỏi
+    function deleteQuestion(button) {
+        if (confirm("Bạn có chắc chắn muốn xóa câu hỏi này không?")) {
+            let row = button.parentElement.parentElement;
+            row.remove();
+            saveToLocalStorage();
+        }
+    }
+
+    // Xóa tất cả câu hỏi
+    function deleteAll() {
+        if (confirm("Bạn có chắc chắn muốn xóa tất cả câu hỏi không?")) {
+            document.getElementById('questionTable').innerHTML = '';
+            localStorage.removeItem('questions');
+        }
+    }
+
+    // Lưu dữ liệu câu hỏi vào LocalStorage
+    function saveToLocalStorage() {
+        let table = document.getElementById('questionTable');
+        let rows = table.getElementsByTagName('tr');
+        let questions = [];
+
+        for (let i = 0; i < rows.length; i++) {
+            let question = rows[i].getElementsByTagName('td')[0].textContent;
+            let answer = rows[i].getElementsByTagName('td')[1].textContent;
+            questions.push({ question: question, answer: answer });
+        }
+
+        // Lưu dữ liệu vào LocalStorage
+        localStorage.setItem('questions', JSON.stringify(questions));
+    }
+
+    // Tải dữ liệu từ LocalStorage
+    function loadData() {
+        let savedQuestions = localStorage.getItem('questions');
+        if (savedQuestions) {
+            let questions = JSON.parse(savedQuestions);
+            questions.forEach(q => {
+                addQuestionToTable(q.question, q.answer);
+            });
+        }
+    }
+
+    // Thêm câu hỏi vào bảng
+    function addQuestionToTable(question, answer) {
+        let table = document.getElementById('questionTable');
+        let newRow = table.insertRow();
+        let cell1 = newRow.insertCell(0);
+        let cell2 = newRow.insertCell(1);
+        let cell3 = newRow.insertCell(2);
+
+        cell1.textContent = question;
+        cell2.innerHTML = `<span class="answer">${answer}</span>`;
+        cell3.innerHTML = `
+            <button onclick="editQuestion(this)">Sửa</button>
+            <button class="delete" onclick="deleteQuestion(this)">Xóa</button>
+        `;
+    }
+
+    // Xử lý file Excel
+    document.getElementById('upload').addEventListener('change', handleFile, false);
+    
+    function handleFile(event) {
+        const file = event.target.files[0];
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+
+            // Giả sử dữ liệu nằm trong sheet đầu tiên
+            const sheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[sheetName];
+
+            // Chuyển đổi sheet thành dữ liệu JSON
+            const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+
+            // Duyệt qua dữ liệu và thêm vào bảng
+            jsonData.forEach((row, index) => {
+                if (index > 0 && row.length >= 2) { // Bỏ qua hàng đầu tiên (giả sử là tiêu đề)
+                    let question = row[0];
+                    let answer = row[1];
+                    addQuestionToTable(question, answer);
+                }
+            });
+
+            // Lưu dữ liệu vào LocalStorage sau khi thêm từ file
+            saveToLocalStorage();
+        };
+        reader.readAsArrayBuffer(file);
+    }
+
+    // Lưu dữ liệu khi nhấn nút "Lưu dữ liệu"
+    function saveData() {
+        saveToLocalStorage();
+        alert('Dữ liệu đã được lưu!');
+    }
+</script>
+
+</body>
+</html>
